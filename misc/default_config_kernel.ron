@@ -3,8 +3,8 @@
   (
       runner: QemuKernel((
         qemu_binary: "../qemu-nyx/x86_64-softmmu/qemu-system-x86_64",
-        kernel: "../../packer/linux_initramfs/bzImage-linux-4.15-rc7",
-        ramfs: "../../packer/linux_initramfs/init.cpio.gz",
+        kernel: "../packer/linux_initramfs/bzImage-linux-4.15-rc7",
+        ramfs: "../packer/linux_initramfs/init.cpio.gz",
         debug: false,
       )),
       fuzz: (
