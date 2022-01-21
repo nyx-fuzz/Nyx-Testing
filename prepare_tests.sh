@@ -42,15 +42,15 @@ cp -R out/sharedir_template_32 out/test_custom_buffer_sizes_host_to_guest_32/
 gcc misc/src/helper.c  misc/src/test_custom_buffer_sizes_host_to_guest.c -m32 -static -I misc/src/ -I ./packer/ -o out/test_custom_buffer_sizes_host_to_guest_32/target
 gcc misc/src/helper.c  misc/src/test_custom_buffer_sizes_host_to_guest.c -m32 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_custom_buffer_sizes_host_to_guest_32/target_no_pt
 
-#echo "Compiling test: test_invalid_config_64"
-#cp -R out/sharedir_template_64 out/test_invalid_config_64/
-#gcc misc/src/helper.c  misc/src/test_invalid_config.c -static -I misc/src/ -I ./packer/ -o out/test_invalid_config_64/target
-#gcc misc/src/helper.c  misc/src/test_invalid_config.c -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_invalid_config_64/target_no_pt
+echo "Compiling test: test_resize_small_coverage_bitmap_64"
+cp -R out/sharedir_template_64 out/test_resize_small_coverage_bitmap_64/
+gcc misc/src/helper.c  misc/src/test_resize_small_coverage_bitmap.c -static -I misc/src/ -I ./packer/ -o out/test_resize_small_coverage_bitmap_64/target
+gcc misc/src/helper.c  misc/src/test_resize_small_coverage_bitmap.c -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_resize_small_coverage_bitmap_64/target_no_pt
 
-#echo "Compiling test: test_invalid_config_32"
-#cp -R out/sharedir_template_32 out/test_invalid_config_32/
-#gcc misc/src/helper.c  misc/src/test_invalid_config.c -static -I misc/src/ -I ./packer/ -o out/test_invalid_config_32/target
-#gcc misc/src/helper.c  misc/src/test_invalid_config.c -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_invalid_config_32/target_no_pt
+echo "Compiling test: test_resize_small_coverage_bitmap_32"
+cp -R out/sharedir_template_32 out/test_resize_small_coverage_bitmap_32/
+gcc misc/src/helper.c  misc/src/test_resize_small_coverage_bitmap.c -static -I misc/src/ -I ./packer/ -o out/test_resize_small_coverage_bitmap_32/target
+gcc misc/src/helper.c  misc/src/test_resize_small_coverage_bitmap.c -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_resize_small_coverage_bitmap_32/target_no_pt
 
 echo "Compiling test: test_hget_fail_64"
 cp -R out/sharedir_template_64 out/test_hget_fail_64/
@@ -63,7 +63,7 @@ cp -R out/sharedir_template_64 out/test_input_buffer_write_protection_64/
 gcc misc/src/helper.c  misc/src/test_input_buffer_write_protection.c -static -I misc/src/ -I ./packer/ -o out/test_input_buffer_write_protection_64/target
 gcc misc/src/helper.c  misc/src/test_input_buffer_write_protection.c -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_input_buffer_write_protection_64/target_no_pt
 
-echo "Compiling test: test_input_buffer_write_protection_64"
+echo "Compiling test: test_input_buffer_write_protection_32"
 cp -R out/sharedir_template_32 out/test_input_buffer_write_protection_32/
 gcc misc/src/helper.c  misc/src/test_input_buffer_write_protection.c -m32 -static -I misc/src/ -I ./packer/ -o out/test_input_buffer_write_protection_32/target
 gcc misc/src/helper.c  misc/src/test_input_buffer_write_protection.c -m32 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_input_buffer_write_protection_32/target_no_pt
@@ -78,3 +78,43 @@ cp -R out/sharedir_template_64 out/test_create_and_load_pre_snapshot/
 gcc misc/src/helper.c  misc/src/test_create_and_load_pre_snapshot.c -static -I misc/src/ -I ./packer/ -o out/test_create_and_load_pre_snapshot/target
 gcc misc/src/helper.c  misc/src/test_create_and_load_pre_snapshot.c -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_create_and_load_pre_snapshot/target_no_pt
 cp misc/config_snapshot.ron out/test_create_and_load_pre_snapshot/config.ron
+
+echo "Compiling test: test_skip_get_host_configuration_64"
+cp -R out/sharedir_template_64 out/test_skip_get_host_configuration_64/
+gcc misc/src/helper.c  misc/src/test_skip_get_host_configuration.c -static -I misc/src/ -I ./packer/ -o out/test_skip_get_host_configuration_64/target
+gcc misc/src/helper.c  misc/src/test_skip_get_host_configuration.c -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_skip_get_host_configuration_64/target_no_pt
+
+echo "Compiling test: test_skip_get_configuration_32"
+cp -R out/sharedir_template_32 out/test_skip_get_host_configuration_32/
+gcc misc/src/helper.c  misc/src/test_skip_get_host_configuration.c -m32 -static -I misc/src/ -I ./packer/ -o out/test_skip_get_host_configuration_32/target
+gcc misc/src/helper.c  misc/src/test_skip_get_host_configuration.c -m32 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_skip_get_host_configuration_32/target_no_pt
+
+echo "Compiling test: test_skip_set_agent_configuration_64"
+cp -R out/sharedir_template_64 out/test_skip_set_agent_configuration_64/
+gcc misc/src/helper.c  misc/src/test_skip_set_agent_configuration.c -static -I misc/src/ -I ./packer/ -o out/test_skip_set_agent_configuration_64/target
+gcc misc/src/helper.c  misc/src/test_skip_set_agent_configuration.c -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_skip_set_agent_configuration_64/target_no_pt
+
+echo "Compiling test: test_skip_set_agent_configuration_64"
+cp -R out/sharedir_template_32 out/test_skip_set_agent_configuration_32/
+gcc misc/src/helper.c  misc/src/test_skip_set_agent_configuration.c -m32 -static -I misc/src/ -I ./packer/ -o out/test_skip_set_agent_configuration_32/target
+gcc misc/src/helper.c  misc/src/test_skip_set_agent_configuration.c -m32 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_skip_set_agent_configuration_32/target_no_pt
+
+echo "Compiling test: test_get_host_configuration_twice_64"
+cp -R out/sharedir_template_64 out/test_get_host_configuration_twice_64/
+gcc misc/src/helper.c  misc/src/test_get_host_configuration_twice.c -static -I misc/src/ -I ./packer/ -o out/test_get_host_configuration_twice_64/target
+gcc misc/src/helper.c  misc/src/test_get_host_configuration_twice.c -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_get_host_configuration_twice_64/target_no_pt
+
+echo "Compiling test: test_get_host_configuration_twice_32"
+cp -R out/sharedir_template_32 out/test_get_host_configuration_twice_32/
+gcc misc/src/helper.c  misc/src/test_get_host_configuration_twice.c -m32 -static -I misc/src/ -I ./packer/ -o out/test_get_host_configuration_twice_32/target
+gcc misc/src/helper.c  misc/src/test_get_host_configuration_twice.c -m32 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_get_host_configuration_twice_32/target_no_pt
+
+echo "Compiling test: test_set_agent_configuration_twice_64"
+cp -R out/sharedir_template_64 out/test_set_agent_configuration_twice_64/
+gcc misc/src/helper.c  misc/src/test_set_agent_configuration_twice.c -static -I misc/src/ -I ./packer/ -o out/test_set_agent_configuration_twice_64/target
+gcc misc/src/helper.c  misc/src/test_set_agent_configuration_twice.c -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_set_agent_configuration_twice_64/target_no_pt
+
+echo "Compiling test: test_set_agent_configuration_twice_32"
+cp -R out/sharedir_template_32 out/test_set_agent_configuration_twice_32/
+gcc misc/src/helper.c  misc/src/test_set_agent_configuration_twice.c -m32 -static -I misc/src/ -I ./packer/ -o out/test_set_agent_configuration_twice_32/target
+gcc misc/src/helper.c  misc/src/test_set_agent_configuration_twice.c -m32 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_set_agent_configuration_twice_32/target_no_pt

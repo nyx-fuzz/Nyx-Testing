@@ -79,6 +79,37 @@ mod tests {
         init_qemu(target, workdir, 0x20000, true, false, false)
     }
 
+    fn test_early_abort(sharedir: &str, error_msg: &str){
+        setup();
+        let workdir = &format!("/tmp/workdir_{}", gettid());
+
+        let process = init_default(sharedir, workdir, false);
+        
+        let success = match process{
+            Err(x) => {
+                println!("--> {}", x);
+                if x.contains(error_msg) {
+                    //"VM_EXIT_KAFL_GET_HOST_CONFIG was not called") || x.contains("VM_EXIT_KAFL_SET_AGENT_CONFIG was not called") {
+                    true
+                }
+                else{
+                    false
+                }
+            },
+            Ok(mut x) => {
+                x.shutdown();
+                false
+            },
+        };
+
+        match fs::remove_dir_all(Path::new(workdir)){
+            Ok(_) => {},
+            Err(_) => {},
+        };
+
+        assert!(success);
+    }
+
     fn test_coverage_bitmap(sharedir: &str){
         setup();
         let workdir = &format!("/tmp/workdir_{}", gettid());
@@ -480,6 +511,16 @@ mod tests {
     }
 
     #[test]
+    fn resize_small_coverage_bitmap_64() {
+        test_resize_coverage_bitmap("out/test_resize_small_coverage_bitmap_64/");
+    }
+
+    #[test]
+    fn resize_small_coverage_bitmap_32() {
+        test_resize_coverage_bitmap("out/test_resize_small_coverage_bitmap_32/");
+    }
+
+    #[test]
     fn resize_coverage_bitmap_host_to_guest_64() {
         test_resize_coverage_bitmap_host_to_guest("out/test_custom_buffer_sizes_host_to_guest_64/");
     }
@@ -557,6 +598,46 @@ mod tests {
     #[test]
     fn call_illegal_hypercalls_child(){
         test_call_illegal_hypercalls_child("out/test_call_invalid_hypercalls/")
+    }
+
+    #[test]
+    fn skip_get_host_configuration_64(){
+        test_early_abort("out/test_skip_get_host_configuration_64/", "VM_EXIT_KAFL_GET_HOST_CONFIG was not called")
+    }
+
+    #[test]
+    fn skip_get_host_configuration_32(){
+        test_early_abort("out/test_skip_get_host_configuration_32/", "VM_EXIT_KAFL_GET_HOST_CONFIG was not called")
+    }
+
+    #[test]
+    fn skip_set_agent_configuration_64(){
+        test_early_abort("out/test_skip_set_agent_configuration_64/", "VM_EXIT_KAFL_SET_AGENT_CONFIG was not called")
+    }
+
+    #[test]
+    fn skip_set_agent_configuration_32(){
+        test_early_abort("out/test_skip_set_agent_configuration_32/", "VM_EXIT_KAFL_SET_AGENT_CONFIG was not called")
+    }
+
+    #[test]
+    fn get_host_configuration_twice_64(){
+        test_early_abort("out/test_get_host_configuration_twice_64/", "KVM_EXIT_KAFL_GET_HOST_CONFIG called twice...")
+    }
+
+    #[test]
+    fn get_host_configuration_twice_32(){
+        test_early_abort("out/test_get_host_configuration_twice_32/", "KVM_EXIT_KAFL_GET_HOST_CONFIG called twice...")
+    }
+
+    #[test]
+    fn set_agent_configuration_twice_64(){
+        test_early_abort("out/test_set_agent_configuration_twice_32/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG called twice...")
+    }
+
+    #[test]
+    fn set_agent_configuration_twice_32(){
+        test_early_abort("out/test_set_agent_configuration_twice_32/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG called twice...")
     }
 }
 

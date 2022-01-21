@@ -10,10 +10,11 @@
 
 int main(int argc, char** argv){
 
+	#define CUSTOM_COVERAGE_BITMAP_SIZE_PAGE_ALIGNED (0x1000)
 	#define CUSTOM_COVERAGE_BITMAP_SIZE (1)
 
 	uint32_t bitmap_size, ijon_bitmap_size, payload_buffer_size;
-	uint8_t* trace_buffer = allocate_page_aligend_buffer(CUSTOM_COVERAGE_BITMAP_SIZE);
+	uint8_t* trace_buffer = allocate_page_aligend_buffer(CUSTOM_COVERAGE_BITMAP_SIZE_PAGE_ALIGNED);
 	uint8_t* ijon_buffer = allocate_page_aligend_buffer(IJON_BUFFER_SIZE);
 
 	dump_mappings();
@@ -24,7 +25,7 @@ int main(int argc, char** argv){
 
 	kAFL_hypercall(HYPERCALL_KAFL_USER_FAST_ACQUIRE, 0);
 
-	memset(trace_buffer, 0xAA, CUSTOM_COVERAGE_BITMAP_SIZE);
+	memset(trace_buffer, 0xAA, CUSTOM_COVERAGE_BITMAP_SIZE_PAGE_ALIGNED);
 	memset(ijon_buffer, 0xBB, IJON_BUFFER_SIZE);
 	memset(payload_buffer, 0xCC, payload_buffer_size);
 
