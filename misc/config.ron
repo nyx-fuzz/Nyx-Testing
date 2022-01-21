@@ -1,0 +1,35 @@
+
+#![enable(implicit_some)]
+(
+    include_default_config_path: "../../misc/default_config_kernel.ron",
+    runner: QemuKernel((
+
+      qemu_binary: "../qemu-nyx/x86_64-softmmu/qemu-system-x86_64",
+      //debug: false,
+    )
+  ),
+  fuzz: (
+    workdir_path: "/tmp/workdir",
+      mem_limit: 512,
+      seed_path: "",
+      dict: [
+      ],
+      ip0: (
+        a: 0,
+        b: 0,
+      ),
+      ip1: (
+        a: 0,
+        b: 0,
+      ),
+      ip2: (
+        a: 0,
+        b: 0,
+      ),
+      ip3: (
+        a: 0,
+        b: 0,
+      ),
+  ),
+)
+  

@@ -1,0 +1,45 @@
+
+#![enable(implicit_some)]
+(
+      include_default_config_path: "./config.ron",
+    runner: QemuSnapshot((
+        qemu_binary: "../../qemu-nyx/x86_64-softmmu/qemu-system-x86_64",
+        hda: "/tmp/hda",
+        presnapshot: "/tmp/snapshot_new/",
+        snapshot_path: DefaultPath,
+        debug: false,
+      )
+  ),
+  fuzz: (
+    workdir_path: "/tmp/workdir",
+      mem_limit: 512,
+      bitmap_size: 65536,
+      time_limit: (
+          secs: 0,
+          nanos: 80000000,
+      ),
+      threads: 1,
+      thread_id: 0,
+      cpu_pin_start_at: 0,
+      snapshot_placement: none,
+      seed_path: "",
+      dict: [],
+      ip0: (
+        a: 0,
+        b: 0,
+      ),
+      ip1: (
+        a: 0,
+        b: 0,
+      ),
+      ip2: (
+        a: 0,
+        b: 0,
+      ),
+      ip3: (
+        a: 0,
+        b: 0,
+      ),
+  ),
+)
+  

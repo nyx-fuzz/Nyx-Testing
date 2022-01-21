@@ -1,0 +1,9 @@
+[submodule "libnyx"]
+	path = libnyx
+	url = https://github.com/nyx-fuzz/libnyx.git
+[submodule "packer"]
+	path = packer
+	url = https://github.com/nyx-fuzz/packer.git
+[submodule "qemu-nyx"]
+	path = qemu-nyx
+	url = https://github.com/nyx-fuzz/qemu-nyx.git
