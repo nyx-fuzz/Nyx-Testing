@@ -1,5 +1,7 @@
 set -e
 
+dd if=/dev/zero of=/tmp/hda count=1024 bs=1024
+
 rm -rf out/
 
 mkdir -p out/
