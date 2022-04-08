@@ -334,12 +334,18 @@ mod tests {
 
         if success{
             success = bitmap_buffer.iter().all(|x| *x == 0xAA);
+            if !success {
+                println!("bitmap buffer check failed");
+            }
         }
         if success{
             success = input_buffer.iter().all(|x| *x == 0xCC);
+            if !success {
+                println!("input buffer check failed");
+            }
         }
 
-        process.shutdown();
+        process.shutdown();    
         fs::remove_dir_all(Path::new(workdir)).unwrap();
 
         assert!(success);
