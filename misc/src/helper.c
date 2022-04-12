@@ -1,3 +1,4 @@
+#define _GNU_SOURCE 1 
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -5,6 +6,9 @@
 #include <string.h>
 #include <inttypes.h>
 #include <unistd.h>
+#include <signal.h>
+#include <unistd.h>
+#include <ucontext.h>
 #include "nyx.h"
 #include "helper.h"
 
@@ -102,4 +106,43 @@ kAFL_payload* allocate_input_buffer(uint32_t payload_buffer_size){
 	kAFL_hypercall(HYPERCALL_KAFL_GET_PAYLOAD, (uintptr_t)payload_buffer);
 	hprintf("[init] payload buffer is mapped at %p (size: 0x%lx)\n", payload_buffer, payload_buffer_size);
 	return payload_buffer;
+}
+
+static void sig_segfault_handler(int signum, siginfo_t *info, void *extra){
+	ucontext_t *context = (ucontext_t *)extra;
+
+#if defined(__i386__)
+	hprintf("Agent crashed at 0x%lx\n", context->uc_mcontext.gregs[REG_EIP]);
+#else
+	hprintf("Agent crashed at 0x%lx\n", context->uc_mcontext.gregs[REG_RIP]);
+#endif
+
+	if (context->uc_mcontext.gregs[REG_ERR] & 16) {
+		hprintf(" * bad jump to 0x%lx\n", info->si_addr);
+            
+#if defined(__i386__)
+		const unsigned long sp = context->uc_mcontext.gregs[REG_ESP];
+#else
+		const unsigned long sp = context->uc_mcontext.gregs[REG_RSP];
+#endif
+		if (sp && !(sp & 7)) {
+			hprintf(" * by the instruction before => %lx\n", sp);
+		}
+	} 
+	else{
+        if (context->uc_mcontext.gregs[REG_ERR] & 2) {
+			hprintf(" * invalid write attempt to %lx\n", info->si_addr);
+		} 
+		else {
+			hprintf(" * invalid read attempt to %lx\n", info->si_addr);
+		}
+	}
+
+    kAFL_hypercall(HYPERCALL_KAFL_PANIC, 0);
+}
+
+void install_segv_handler(void){
+	struct sigaction action;
+    action.sa_flags = SA_SIGINFO;
+    action.sa_sigaction = sig_segfault_handler;
 }

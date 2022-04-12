@@ -16,7 +16,10 @@ sh prepare_tests.sh
 ## Run
 
 ```
-cargo test
+./run_tests.sh
+
+# to start additional Intel Processor Trace tests run the following command
+./run_tests_pt.sh
 ```
 
 ## Bug Reports and Contributions
