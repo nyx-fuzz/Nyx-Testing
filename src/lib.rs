@@ -110,6 +110,43 @@ mod tests {
         assert!(success);
     }
 
+    fn test_processor_trace(sharedir: &str, use_redqueen: bool){
+        setup();
+        let workdir = &format!("/tmp/workdir_{}", gettid());
+
+        let mut process = init_default(sharedir, workdir, false).unwrap();
+        
+        let mut success = true;
+
+        let size = 10;
+        let input_data = "KEAAELAFL\x00".as_bytes();
+        process.set_input(input_data, size);
+        process.exec();
+
+        let input_buffer = process.bitmap_buffer();      
+        success = !input_buffer.iter().all(|x| *x == 0x00);
+
+        if use_redqueen {
+            process.option_set_redqueen_mode(true);
+            process.option_apply();
+            process.exec();
+        }
+
+        success = if use_redqueen {
+            let trace_size = fs::metadata(format!("{}/redqueen_workdir_0/redqueen_results.txt", workdir)).unwrap().len();
+            println!("Trace Size: {}", trace_size);
+            trace_size != 0
+        }
+        else {
+            success
+        };
+        
+        process.shutdown();
+        fs::remove_dir_all(Path::new(workdir)).unwrap();
+
+        assert!(success);
+    }
+
     fn test_coverage_bitmap(sharedir: &str){
         setup();
         let workdir = &format!("/tmp/workdir_{}", gettid());
@@ -644,6 +681,26 @@ mod tests {
     #[test]
     fn set_agent_configuration_twice_32(){
         test_early_abort("out/test_set_agent_configuration_twice_32/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG called twice...")
+    }
+
+    #[test]
+    fn processor_trace_64(){
+        test_processor_trace("out/test_processor_trace_64/", false)
+    }
+
+    #[test]
+    fn processor_trace_32(){
+        test_processor_trace("out/test_processor_trace_32/", false)
+    }
+
+    #[test]
+    fn processor_trace_redqueen_64(){
+        test_processor_trace("out/test_processor_trace_64/", true)
+    }
+
+    #[test]
+    fn processor_trace_redqueen_32(){
+        test_processor_trace("out/test_processor_trace_32/", true)
     }
 }
 

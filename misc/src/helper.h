@@ -20,4 +20,5 @@ void set_agent_config(bool enable_agent_trace_buffer, uintptr_t trace_buffer_vad
 						bool reload_mode, uint32_t custom_coverage_bitmap_size);
 uint8_t* allocate_page_aligend_buffer(size_t size);
 kAFL_payload* allocate_input_buffer(uint32_t payload_buffer_size);
+void install_segv_handler(void);
 
