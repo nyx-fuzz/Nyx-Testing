@@ -79,7 +79,49 @@ mod tests {
         init_qemu(target, workdir, 0x20000, true, false, false)
     }
 
-    fn test_early_abort(sharedir: &str, error_msg: &str){
+    fn init_default_kpti(target: &str, workdir: &str, input_buffer_write_protection: bool) -> Result<NyxProcess, String>{
+
+        let mut config = NyxConfig::load(target).unwrap();
+        config.set_qemu_kernel_args("".to_string());
+        config.set_workdir_path(workdir.to_string());
+        config.set_write_protected_input_buffer(input_buffer_write_protection);
+    
+        let process = NyxProcess::from_config(target, &config, 0, false);
+
+        let qemu = match process{
+            Ok(mut x) => {
+                x.option_set_reload_mode(true);
+                x.option_apply();
+                x
+            },
+            Err(msg) => {
+                return Err(msg);
+                //panic!("{}", msg);
+            }
+        };
+
+        Ok(qemu)
+    }
+
+    fn test_success(sharedir: &str){
+        setup();
+        let workdir = &format!("/tmp/workdir_{}", gettid());
+
+        let process = init_default(sharedir, workdir, false);
+        
+        let mut runner = process.unwrap();
+
+        let success = match runner.exec() {
+            NyxReturnValue::Normal => true,
+            _ => false,
+        };
+        runner.shutdown();
+        fs::remove_dir_all(Path::new(workdir)).unwrap();
+
+        assert!(success);
+    }
+
+    fn test_abort(sharedir: &str, error_msg: &str, runtime: bool){
         setup();
         let workdir = &format!("/tmp/workdir_{}", gettid());
 
@@ -89,16 +131,34 @@ mod tests {
             Err(x) => {
                 println!("--> {}", x);
                 if x.contains(error_msg) {
-                    //"VM_EXIT_KAFL_GET_HOST_CONFIG was not called") || x.contains("VM_EXIT_KAFL_SET_AGENT_CONFIG was not called") {
-                    true
+                    if runtime {
+                        /* we don't expect an error during setup, only during runtime */
+                        false
+                    }
+                    else {
+                        true
+                    }
                 }
                 else{
                     false
                 }
             },
             Ok(mut x) => {
+                let result = if runtime{
+                    match x.exec() {
+                        NyxReturnValue::Abort(reason) => {
+                            reason.contains("No processor trace CR3 filter configured...")
+                        },
+                        _ => {
+                            false
+                        }
+                    }
+                }
+                else {
+                    false
+                };
                 x.shutdown();
-                false
+                result
             },
         };
 
@@ -110,13 +170,18 @@ mod tests {
         assert!(success);
     }
 
-    fn test_processor_trace(sharedir: &str, use_redqueen: bool){
+    fn test_processor_trace(sharedir: &str, use_redqueen: bool, use_kpti: bool){
         setup();
         let workdir = &format!("/tmp/workdir_{}", gettid());
 
-        let mut process = init_default(sharedir, workdir, false).unwrap();
+        let mut process = if use_kpti{
+            init_default_kpti(sharedir, workdir, false).unwrap()
+        }
+        else{
+            init_default(sharedir, workdir, false).unwrap()
+        };
         
-        let mut success = true;
+        let mut success;
 
         let size = 10;
         let input_data = "KEAAELAFL\x00".as_bytes();
@@ -131,15 +196,16 @@ mod tests {
             process.option_apply();
             process.exec();
         }
-
+        
         success = if use_redqueen {
             let trace_size = fs::metadata(format!("{}/redqueen_workdir_0/redqueen_results.txt", workdir)).unwrap().len();
             println!("Trace Size: {}", trace_size);
-            trace_size != 0
+            success && trace_size != 0
         }
         else {
             success
         };
+  
         
         process.shutdown();
         fs::remove_dir_all(Path::new(workdir)).unwrap();
@@ -236,7 +302,7 @@ mod tests {
 
             let ret = process.exec();
             success =  match ret {
-                NyxReturnValue::Abort => true,
+                NyxReturnValue::Abort(_) => true,
                 _ => false,
             };
         }
@@ -297,16 +363,14 @@ mod tests {
         }
         fs::create_dir("/tmp/snapshot_new").unwrap();
         
-        let output = Command::new(&cmd[0])
+        Command::new(&cmd[0])
         .args(&cmd[1..])
         .env("NYX_DISABLE_DIRTY_RING", "y")
         .output()
         .expect("failed to execute process");
 
-        let stdout_output = String::from_utf8_lossy(&output.stdout);
-
-        assert_eq!(stdout_output, "Creating pre image snapshot[qemu-nyx] switching to secondary CoW buffer\n");
-
+        assert!(Path::new(&format!("/tmp/snapshot_new/fast_snapshot.qemu_state")).exists());
+        
         /* load pre snapshot */        
         let workdir = &format!("/tmp/workdir_{}", gettid());
         let mut process = init_default("out/test_create_and_load_pre_snapshot/", workdir, false).unwrap();
@@ -497,7 +561,7 @@ mod tests {
         let mut process = init_default(sharedir, workdir, true).unwrap();
 
         let success = match process.exec(){
-            NyxReturnValue::Abort => true,
+            NyxReturnValue::Abort(_) => true,
             x => {
                 println!("{:?}", x);
                 false
@@ -520,7 +584,7 @@ mod tests {
         let mut process = init_child_default(sharedir, workdir).unwrap();
 
         let success = match process.exec(){
-            NyxReturnValue::Abort => true,
+            NyxReturnValue::Abort(_) => true,
             x => {
                 println!("{:?}", x);
                 false
@@ -645,62 +709,142 @@ mod tests {
 
     #[test]
     fn skip_get_host_configuration_64(){
-        test_early_abort("out/test_skip_get_host_configuration_64/", "VM_EXIT_KAFL_GET_HOST_CONFIG was not called")
+        test_abort("out/test_skip_get_host_configuration_64/", "VM_EXIT_KAFL_GET_HOST_CONFIG was not called", false)
     }
 
     #[test]
     fn skip_get_host_configuration_32(){
-        test_early_abort("out/test_skip_get_host_configuration_32/", "VM_EXIT_KAFL_GET_HOST_CONFIG was not called")
+        test_abort("out/test_skip_get_host_configuration_32/", "VM_EXIT_KAFL_GET_HOST_CONFIG was not called", false)
     }
 
     #[test]
     fn skip_set_agent_configuration_64(){
-        test_early_abort("out/test_skip_set_agent_configuration_64/", "VM_EXIT_KAFL_SET_AGENT_CONFIG was not called")
+        test_abort("out/test_skip_set_agent_configuration_64/", "VM_EXIT_KAFL_SET_AGENT_CONFIG was not called", false)
     }
 
     #[test]
     fn skip_set_agent_configuration_32(){
-        test_early_abort("out/test_skip_set_agent_configuration_32/", "VM_EXIT_KAFL_SET_AGENT_CONFIG was not called")
+        test_abort("out/test_skip_set_agent_configuration_32/", "VM_EXIT_KAFL_SET_AGENT_CONFIG was not called", false)
     }
 
     #[test]
     fn get_host_configuration_twice_64(){
-        test_early_abort("out/test_get_host_configuration_twice_64/", "KVM_EXIT_KAFL_GET_HOST_CONFIG called twice...")
+        test_abort("out/test_get_host_configuration_twice_64/", "KVM_EXIT_KAFL_GET_HOST_CONFIG called twice...", false)
     }
 
     #[test]
     fn get_host_configuration_twice_32(){
-        test_early_abort("out/test_get_host_configuration_twice_32/", "KVM_EXIT_KAFL_GET_HOST_CONFIG called twice...")
+        test_abort("out/test_get_host_configuration_twice_32/", "KVM_EXIT_KAFL_GET_HOST_CONFIG called twice...", false)
     }
 
     #[test]
     fn set_agent_configuration_twice_64(){
-        test_early_abort("out/test_set_agent_configuration_twice_32/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG called twice...")
+        test_abort("out/test_set_agent_configuration_twice_32/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG called twice...", false)
     }
 
     #[test]
     fn set_agent_configuration_twice_32(){
-        test_early_abort("out/test_set_agent_configuration_twice_32/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG called twice...")
+        test_abort("out/test_set_agent_configuration_twice_32/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG called twice...", false)
     }
 
     #[test]
     fn processor_trace_64(){
-        test_processor_trace("out/test_processor_trace_64/", false)
+        test_processor_trace("out/test_processor_trace_64/", false, false)
     }
 
     #[test]
     fn processor_trace_32(){
-        test_processor_trace("out/test_processor_trace_32/", false)
+        test_processor_trace("out/test_processor_trace_32/", false, false)
     }
 
     #[test]
     fn processor_trace_redqueen_64(){
-        test_processor_trace("out/test_processor_trace_64/", true)
+        test_processor_trace("out/test_processor_trace_64/", true, false)
     }
 
     #[test]
     fn processor_trace_redqueen_32(){
-        test_processor_trace("out/test_processor_trace_32/", true)
+        test_processor_trace("out/test_processor_trace_32/", true, false)
     }
+
+    #[test]
+    fn processor_trace_kernel_64(){
+        test_processor_trace("out/test_processor_trace_kernel_64/", false, false)
+    }
+
+    #[test]
+    fn processor_trace_kernel_32(){
+        test_processor_trace("out/test_processor_trace_kernel_32/", false, false)
+    }
+
+    #[test]
+    fn processor_trace_kernel_kpti_64(){
+        test_processor_trace("out/test_processor_trace_kernel_64/", false, true)
+    }
+
+    #[test]
+    fn processor_trace_kernel_ktpi_32(){
+        test_processor_trace("out/test_processor_trace_kernel_32/", false, true)
+    }
+
+    #[test]
+    fn processor_trace_redqueen_kernel_64(){
+        test_processor_trace("out/test_processor_trace_kernel_64/", true, false)
+    }
+
+    #[test]
+    fn processor_trace_redqueen_kernel_32(){
+        test_processor_trace("out/test_processor_trace_kernel_32/", true, false)
+    }
+
+    #[test]
+    fn processor_trace_invalid_range_64(){
+        test_abort("out/test_processor_trace_invalid_range_64/", "No processor trace IP range filters configured...", false)
+    }
+
+    #[test]
+    fn processor_trace_invalid_range_32(){
+        test_abort("out/test_processor_trace_invalid_range_64/", "No processor trace IP range filters configured...", false)
+    }
+
+    #[test]
+    fn processor_trace_no_range_64(){
+        test_abort("out/test_processor_trace_no_range_64/", "No processor trace IP range filters configured...", false)
+    }
+
+    #[test]
+    fn processor_trace_no_range_32(){
+        test_abort("out/test_processor_trace_no_range_64/", "No processor trace IP range filters configured...", false)
+    }
+
+    #[test]
+    fn processor_trace_no_cr3_filter_64(){
+        test_abort("out/test_processor_trace_no_cr3_filter_64/", "No processor trace CR3 filters configured...", true)
+    }
+
+    #[test]
+    fn processor_trace_no_cr3_filter_32(){
+        test_abort("out/test_processor_trace_no_cr3_filter_32/", "No processor trace CR3 filter configured...", true)
+    }    
+
+    #[test]
+    fn memory_access_64(){
+        test_success("out/test_memory_access_64/")
+    }
+
+    #[test]
+    fn memory_access_32(){
+        test_success("out/test_memory_access_32/")
+    }   
+
+    #[test]
+    fn memory_access_snapshot_64(){
+        test_success("out/test_memory_access_snapshot_64/")
+    }
+
+    #[test]
+    fn memory_access_snapshot_32(){
+        test_success("out/test_memory_access_snapshot_32/")
+    }   
 }
 

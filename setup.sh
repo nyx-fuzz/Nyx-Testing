@@ -12,6 +12,6 @@ fi
 
 if [ ! -f "./qemu-nyx/x86_64-softmmu/qemu-system-x86_64" ]; then
     cd qemu-nyx
-    ./compile_qemu_nyx.sh static
+    ./compile_qemu_nyx.sh debug_static
     cd -
 fi

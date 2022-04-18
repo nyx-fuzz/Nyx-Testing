@@ -76,7 +76,8 @@ void get_host_config(uint32_t* bitmap_size, uint32_t* ijon_bitmap_size, uint32_t
 
 void set_agent_config(bool enable_agent_trace_buffer, uintptr_t trace_buffer_vaddr, 
 						bool enable_ijon_trace_buffer, uintptr_t ijon_trace_buffer_vaddr, 
-						bool reload_mode, uint32_t custom_coverage_bitmap_size){
+						bool reload_mode, uint32_t custom_coverage_bitmap_size,
+						uint8_t pt_cr3_mode, uint64_t pt_cr3_mode_value){
 	agent_config_t agent_config = {0};
     agent_config.agent_magic = NYX_AGENT_MAGIC;
     agent_config.agent_version = NYX_AGENT_VERSION;
@@ -88,6 +89,11 @@ void set_agent_config(bool enable_agent_trace_buffer, uintptr_t trace_buffer_vad
 	agent_config.ijon_trace_buffer_vaddr = (uintptr_t)ijon_trace_buffer_vaddr;
     agent_config.agent_non_reload_mode = 1;
     agent_config.coverage_bitmap_size = custom_coverage_bitmap_size;
+
+	if(pt_cr3_mode){
+		agent_config.pt_cr3_mode = pt_cr3_mode;
+		agent_config.pt_cr3_mode_value = pt_cr3_mode_value;
+	}
 
     kAFL_hypercall(HYPERCALL_KAFL_SET_AGENT_CONFIG, (uintptr_t)&agent_config);
 }
@@ -145,4 +151,34 @@ void install_segv_handler(void){
 	struct sigaction action;
     action.sa_flags = SA_SIGINFO;
     action.sa_sigaction = sig_segfault_handler;
+}
+
+bool check_kpti(void){
+
+	#define SYS_MELTDOWN_PATH "/sys/devices/system/cpu/vulnerabilities/meltdown"
+	#define PTI_STR_LEN 15
+
+	char* pti_str = "Mitigation: PTI";
+
+	FILE *fp = fopen(SYS_MELTDOWN_PATH, "r");
+	if (fp == NULL){
+		return false;
+	}
+	fseek(fp, 0, SEEK_END);
+	long size = ftell(fp);
+	fclose(fp);
+
+	if (size >= PTI_STR_LEN){
+		char buf[PTI_STR_LEN];
+		
+		FILE *fp = fopen(SYS_MELTDOWN_PATH, "r");
+		fread(buf, 1, PTI_STR_LEN, fp);
+		fclose(fp);
+
+		if (memcmp(buf, pti_str, PTI_STR_LEN) == 0){
+			return true;
+		}
+	}
+
+	return false;
 }
