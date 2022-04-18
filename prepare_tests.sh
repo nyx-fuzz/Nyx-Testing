@@ -130,3 +130,63 @@ echo "Compiling test: test_processor_trace_32"
 cp -R out/sharedir_template_32 out/test_processor_trace_32/
 gcc misc/src/helper.c  misc/src/test_processor_trace.c -m32 -static -I misc/src/ -I ./packer/ -o out/test_processor_trace_32/target
 gcc misc/src/helper.c  misc/src/test_processor_trace.c -m32 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_processor_trace_32/target_no_pt
+
+echo "Compiling test: test_processor_trace_kernel_64"
+cp -R out/sharedir_template_64 out/test_processor_trace_kernel_64/
+gcc misc/src/helper.c  misc/src/test_processor_trace.c -m64 -DTEST_PT_KERNEL -static -I misc/src/ -I ./packer/ -o out/test_processor_trace_kernel_64/target
+gcc misc/src/helper.c  misc/src/test_processor_trace.c -m64 -DTEST_PT_KERNEL -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_processor_trace_kernel_64/target_no_pt
+
+echo "Compiling test: test_processor_trace_kernel_32"
+cp -R out/sharedir_template_32 out/test_processor_trace_kernel_32/
+gcc misc/src/helper.c  misc/src/test_processor_trace.c -m32 -DTEST_PT_KERNEL -static -I misc/src/ -I ./packer/ -o out/test_processor_trace_kernel_32/target
+gcc misc/src/helper.c  misc/src/test_processor_trace.c -m32 -DTEST_PT_KERNEL -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_processor_trace_kernel_32/target_no_pt
+
+echo "Compiling test: test_processor_trace_invalid_range_64"
+cp -R out/sharedir_template_64 out/test_processor_trace_invalid_range_64/
+gcc misc/src/helper.c  misc/src/test_processor_trace_invalid_ip_config.c -m64 -DTEST_INVALID_RANGE -static -I misc/src/ -I ./packer/ -o out/test_processor_trace_invalid_range_64/target
+gcc misc/src/helper.c  misc/src/test_processor_trace_invalid_ip_config.c -m64 -DTEST_INVALID_RANGE -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_processor_trace_invalid_range_64/target_no_pt
+
+echo "Compiling test: test_processor_trace_invalid_range_32"
+cp -R out/sharedir_template_32 out/test_processor_trace_invalid_range_32/
+gcc misc/src/helper.c  misc/src/test_processor_trace_invalid_ip_config.c -m32 -DTEST_INVALID_RANGE -static -I misc/src/ -I ./packer/ -o out/test_processor_trace_invalid_range_32/target
+gcc misc/src/helper.c  misc/src/test_processor_trace_invalid_ip_config.c -m32 -DTEST_INVALID_RANGE -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_processor_trace_invalid_range_32/target_no_pt
+
+echo "Compiling test: test_processor_trace_no_range_64"
+cp -R out/sharedir_template_64 out/test_processor_trace_no_range_64/
+gcc misc/src/helper.c  misc/src/test_processor_trace_invalid_ip_config.c -m64 -static -I misc/src/ -I ./packer/ -o out/test_processor_trace_no_range_64/target
+gcc misc/src/helper.c  misc/src/test_processor_trace_invalid_ip_config.c -m64 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_processor_trace_no_range_64/target_no_pt
+
+echo "Compiling test: test_processor_trace_no_range_32"
+cp -R out/sharedir_template_32 out/test_processor_trace_no_range_32/
+gcc misc/src/helper.c  misc/src/test_processor_trace_invalid_ip_config.c -m32 -static -I misc/src/ -I ./packer/ -o out/test_processor_trace_no_range_32/target
+gcc misc/src/helper.c  misc/src/test_processor_trace_invalid_ip_config.c -m32 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_processor_trace_no_range_32/target_no_pt
+
+echo "Compiling test: test_processor_trace_no_cr3_filter_64"
+cp -R out/sharedir_template_64 out/test_processor_trace_no_cr3_filter_64/
+gcc misc/src/helper.c  misc/src/test_processor_trace_cr3.c -m64 -DTEST_NO_CR3_FILTER -static -I misc/src/ -I ./packer/ -o out/test_processor_trace_no_cr3_filter_64/target
+gcc misc/src/helper.c  misc/src/test_processor_trace_cr3.c -m64 -DTEST_NO_CR3_FILTER -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_processor_trace_no_cr3_filter_64/target_no_pt
+
+echo "Compiling test: test_processor_trace_no_cr3_filter_32"
+cp -R out/sharedir_template_32 out/test_processor_trace_no_cr3_filter_32/
+gcc misc/src/helper.c  misc/src/test_processor_trace_cr3.c -m32 -DTEST_NO_CR3_FILTER -static -I misc/src/ -I ./packer/ -o out/test_processor_trace_no_cr3_filter_32/target
+gcc misc/src/helper.c  misc/src/test_processor_trace_cr3.c -m32 -DTEST_NO_CR3_FILTER -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_processor_trace_no_cr3_filter_32/target_no_pt
+
+echo "Compiling test: test_memory_access_64"
+cp -R out/sharedir_template_64 out/test_memory_access_64/
+gcc misc/src/helper.c  misc/src/test_memory_access.c -m64 -static -I misc/src/ -I ./packer/ -o out/test_memory_access_64/target
+gcc misc/src/helper.c  misc/src/test_memory_access.c -m64 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_memory_access_64/target_no_pt
+
+echo "Compiling test: test_memory_access_32"
+cp -R out/sharedir_template_64 out/test_memory_access_32/
+gcc misc/src/helper.c  misc/src/test_memory_access.c -m32 -static -I misc/src/ -I ./packer/ -o out/test_memory_access_32/target
+gcc misc/src/helper.c  misc/src/test_memory_access.c -m32 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_memory_access_32/target_no_pt
+
+echo "Compiling test: test_memory_access_snapshot_64"
+cp -R out/sharedir_template_64 out/test_memory_access_snapshot_64/
+gcc misc/src/helper.c  misc/src/test_memory_access.c -m64 -DTEST_SNAPSHOT_MEMORY -static -I misc/src/ -I ./packer/ -o out/test_memory_access_snapshot_64/target
+gcc misc/src/helper.c  misc/src/test_memory_access.c -m64 -DTEST_SNAPSHOT_MEMORY -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_memory_access_snapshot_64/target_no_pt
+
+echo "Compiling test: test_memory_access_snapshot_32"
+cp -R out/sharedir_template_64 out/test_memory_access_snapshot_32/
+gcc misc/src/helper.c  misc/src/test_memory_access.c -m32 -DTEST_SNAPSHOT_MEMORY -static -I misc/src/ -I ./packer/ -o out/test_memory_access_snapshot_32/target
+gcc misc/src/helper.c  misc/src/test_memory_access.c -m32 -DTEST_SNAPSHOT_MEMORY -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_memory_access_snapshot_32/target_no_pt

@@ -16,7 +16,7 @@ int main(int argc, char** argv){
 
 	dump_mappings();
 	get_host_config(&bitmap_size, &ijon_bitmap_size, &payload_buffer_size);
-	set_agent_config(true, (uintptr_t)trace_buffer, true, (uintptr_t)ijon_buffer, true, DEFAULT_COVERAGE_BITMAP_SIZE);
+	set_agent_config(true, (uintptr_t)trace_buffer, true, (uintptr_t)ijon_buffer, true, DEFAULT_COVERAGE_BITMAP_SIZE, 0, 0);
 
 	kAFL_payload* payload_buffer = allocate_input_buffer(payload_buffer_size);
 	kAFL_hypercall(HYPERCALL_KAFL_USER_FAST_ACQUIRE, 0);
