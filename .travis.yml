@@ -31,3 +31,4 @@ install:
   - sh prepare_tests.sh
 
 script: ./run_tests.sh
+script: ./run_tests_pt.sh
