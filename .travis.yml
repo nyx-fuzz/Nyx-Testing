@@ -36,4 +36,5 @@ install:
   - sh prepare_tests.sh
 
 script: ./run_tests.sh
-script: ./run_tests_pt.sh
+# intel-pt is not avaliable in travis now
+# script: ./run_tests_pt.sh
