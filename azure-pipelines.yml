@@ -1,0 +1,17 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: sudo modprobe -r kvm-intel
+- script: sudo modprobe -r kvm
+- script: sudo modprobe  kvm enable_vmware_backdoor=y
+- script: sudo modprobe  kvm-intel
+- script: cat /sys/module/kvm/parameters/enable_vmware_backdoor
