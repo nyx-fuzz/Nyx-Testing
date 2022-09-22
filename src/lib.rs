@@ -116,7 +116,7 @@ mod tests {
 
         let mut process = init_default(sharedir, workdir, false).unwrap();
         
-        let mut success = true;
+        let mut success;
 
         let size = 10;
         let input_data = "KEAAELAFL\x00".as_bytes();
@@ -287,6 +287,11 @@ mod tests {
         cmd.push("-cpu".to_string());
         cmd.push("kAFL64-Hypervisor-v1,+vmx".to_string());
 
+        cmd.push("-d".to_string());
+        cmd.push("nyx".to_string());
+        cmd.push("-D".to_string());
+        cmd.push("/tmp/qemu_nyx_log".to_string());
+
         cmd.push("-fast_vm_reload".to_string());
         cmd.push("pre_path=/tmp/snapshot_new,load=off".to_string());
 
@@ -297,15 +302,15 @@ mod tests {
         }
         fs::create_dir("/tmp/snapshot_new").unwrap();
         
-        let output = Command::new(&cmd[0])
+        Command::new(&cmd[0])
         .args(&cmd[1..])
         .env("NYX_DISABLE_DIRTY_RING", "y")
         .output()
         .expect("failed to execute process");
 
-        let stdout_output = String::from_utf8_lossy(&output.stdout);
-
-        assert_eq!(stdout_output, "Creating pre image snapshot[qemu-nyx] switching to secondary CoW buffer\n");
+        let output = fs::read_to_string("/tmp/qemu_nyx_log").unwrap();
+        assert!(output.contains("Creating pre image snapshot"));
+        assert!(output.contains("switching to secondary CoW buffer"));
 
         /* load pre snapshot */        
         let workdir = &format!("/tmp/workdir_{}", gettid());
