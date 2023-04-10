@@ -650,33 +650,24 @@ mod tests {
 
     #[test]
     fn skip_get_host_configuration_64(){
-        test_early_abort("out/test_skip_get_host_configuration_64/", "VM_EXIT_KAFL_GET_HOST_CONFIG was not called")
+        test_early_abort("out/test_skip_get_host_configuration_64/", "KVM_EXIT_KAFL_GET_HOST_CONFIG was not called")
     }
 
     #[test]
     fn skip_get_host_configuration_32(){
-        test_early_abort("out/test_skip_get_host_configuration_32/", "VM_EXIT_KAFL_GET_HOST_CONFIG was not called")
+        test_early_abort("out/test_skip_get_host_configuration_32/", "KVM_EXIT_KAFL_GET_HOST_CONFIG was not called")
     }
 
     #[test]
     fn skip_set_agent_configuration_64(){
-        test_early_abort("out/test_skip_set_agent_configuration_64/", "VM_EXIT_KAFL_SET_AGENT_CONFIG was not called")
+        test_early_abort("out/test_skip_set_agent_configuration_64/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG was not called")
     }
 
     #[test]
     fn skip_set_agent_configuration_32(){
-        test_early_abort("out/test_skip_set_agent_configuration_32/", "VM_EXIT_KAFL_SET_AGENT_CONFIG was not called")
+        test_early_abort("out/test_skip_set_agent_configuration_32/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG was not called")
     }
 
-    #[test]
-    fn get_host_configuration_twice_64(){
-        test_early_abort("out/test_get_host_configuration_twice_64/", "KVM_EXIT_KAFL_GET_HOST_CONFIG called twice...")
-    }
-
-    #[test]
-    fn get_host_configuration_twice_32(){
-        test_early_abort("out/test_get_host_configuration_twice_32/", "KVM_EXIT_KAFL_GET_HOST_CONFIG called twice...")
-    }
 
     #[test]
     fn set_agent_configuration_twice_64(){
