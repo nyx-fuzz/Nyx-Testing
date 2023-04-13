@@ -8,6 +8,7 @@ mod tests {
     //use std::sync::Once;
     use std::path::Path;
     use libnyx::*;
+    use libnyx::NyxConfig;
 
     //static INIT: Once = Once::new();
 
@@ -33,10 +34,28 @@ mod tests {
 
     fn init_qemu(target: &str, workdir: &str, input_buffer_size: u32, create_snapshot: bool, is_parent: bool, input_buffer_write_protection: bool) -> Result<NyxProcess, String>{
 
+        let mut nyx_config = NyxConfig::load(target).unwrap();
+        nyx_config.set_workdir_path(workdir.to_string());
+        nyx_config.set_input_buffer_size(input_buffer_size as usize);
+
         let process = match (create_snapshot, is_parent){
-            (false, false) => NyxProcess::new(target, workdir, 0, input_buffer_size, input_buffer_write_protection),
-            (true, true) => NyxProcess::new_parent(target, workdir, 0, input_buffer_size, input_buffer_write_protection),
-            (true, false) => NyxProcess::new_child(target, workdir, 0, 1),
+            (false, false) => {
+                nyx_config.set_input_buffer_write_protection(input_buffer_write_protection);
+                nyx_config.set_process_role(NyxProcessRole::StandAlone);
+
+                NyxProcess::new(&mut nyx_config, 0)
+            },
+            (true, true) => {
+                nyx_config.set_input_buffer_write_protection(input_buffer_write_protection);
+                nyx_config.set_process_role(NyxProcessRole::Parent);
+
+                NyxProcess::new(&mut nyx_config, 0)
+            },
+            (true, false) => {
+                nyx_config.set_process_role(NyxProcessRole::Child);
+
+                NyxProcess::new(&mut nyx_config, 1)
+            },
             _ => panic!("invalid"),
         };
 
