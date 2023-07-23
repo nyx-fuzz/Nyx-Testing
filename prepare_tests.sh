@@ -130,3 +130,8 @@ echo "Compiling test: test_processor_trace_32"
 cp -R out/sharedir_template_32 out/test_processor_trace_32/
 gcc misc/src/helper.c  misc/src/test_processor_trace.c -m32 -static -I misc/src/ -I ./packer/ -o out/test_processor_trace_32/target
 gcc misc/src/helper.c  misc/src/test_processor_trace.c -m32 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_processor_trace_32/target_no_pt
+
+echo "Compiling test: test_variable_aux_buffer_size"
+cp -R out/sharedir_template_64 out/test_variable_aux_buffer_size/
+gcc misc/src/helper.c  misc/src/test_variable_aux_buffer_size.c -static -I misc/src/ -I ./packer/ -o out/test_variable_aux_buffer_size/target
+gcc misc/src/helper.c  misc/src/test_variable_aux_buffer_size.c -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_variable_aux_buffer_size/target_no_pt
