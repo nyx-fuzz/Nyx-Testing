@@ -32,11 +32,15 @@ mod tests {
         */
     }
 
-    fn init_qemu(target: &str, workdir: &str, input_buffer_size: u32, create_snapshot: bool, is_parent: bool, input_buffer_write_protection: bool) -> Result<NyxProcess, String>{
+    fn init_qemu(target: &str, workdir: &str, input_buffer_size: u32, create_snapshot: bool, is_parent: bool, input_buffer_write_protection: bool, custom_aux_buffer_size: Option<usize>) -> Result<NyxProcess, String>{
 
         let mut nyx_config = NyxConfig::load(target).unwrap();
         nyx_config.set_workdir_path(workdir.to_string());
         nyx_config.set_input_buffer_size(input_buffer_size as usize);
+
+        if custom_aux_buffer_size.is_some(){
+            assert!(nyx_config.set_aux_buffer_size(custom_aux_buffer_size.unwrap()));
+        }
 
         let process = match (create_snapshot, is_parent){
             (false, false) => {
@@ -75,15 +79,15 @@ mod tests {
     }
 
     fn init(target: &str, workdir: &str, input_buffer_size: u32, input_buffer_write_protection: bool) -> Result<NyxProcess, String>{
-        init_qemu(target, workdir, input_buffer_size, false, false, input_buffer_write_protection)
+        init_qemu(target, workdir, input_buffer_size, false, false, input_buffer_write_protection, None)
     }
 
     fn init_parent(target: &str, workdir: &str, input_buffer_size: u32, input_buffer_write_protection: bool) -> Result<NyxProcess, String>{
-        init_qemu(target, workdir, input_buffer_size, true, true, input_buffer_write_protection)
+        init_qemu(target, workdir, input_buffer_size, true, true, input_buffer_write_protection, None)
     }
 
     fn init_child(target: &str, workdir: &str, input_buffer_size: u32) -> Result<NyxProcess, String>{
-        init_qemu(target, workdir, input_buffer_size, true, false, false)
+        init_qemu(target, workdir, input_buffer_size, true, false, false, None)
     }
 
     fn init_default(target: &str, workdir: &str, input_buffer_write_protection: bool) -> Result<NyxProcess, String>{
@@ -91,11 +95,11 @@ mod tests {
     }
 
     fn init_parent_default(target: &str, workdir: &str, input_buffer_write_protection: bool) -> Result<NyxProcess, String>{
-        init_qemu(target, workdir, 0x20000, true, true, input_buffer_write_protection)
+        init_qemu(target, workdir, 0x20000, true, true, input_buffer_write_protection, None)
     }
 
     fn init_child_default(target: &str, workdir: &str) -> Result<NyxProcess, String>{
-        init_qemu(target, workdir, 0x20000, true, false, false)
+        init_qemu(target, workdir, 0x20000, true, false, false, None)
     }
 
     fn test_early_abort(sharedir: &str, error_msg: &str){
@@ -717,5 +721,31 @@ mod tests {
     fn processor_trace_redqueen_32(){
         test_processor_trace("out/test_processor_trace_32/", true)
     }
+
+    #[test]
+    fn variable_aux_buffer_size(){
+        setup();
+
+        for test_value in [0x1000, 0x1000*2, 0x1000*4, 0x1000*5, 0x1000*8].iter() {
+
+            let workdir = &format!("/tmp/workdir_{}", gettid());
+
+            let mut process = init_qemu("out/test_variable_aux_buffer_size/", workdir, 0x20000, false, false, false, Some(*test_value)).unwrap();
+            
+            /* check if file meta data matches the configured size */
+            let metadata = fs::metadata(Path::new(&format!("{}/aux_buffer_0", workdir))).unwrap();
+            assert_eq!(metadata.len(), *test_value as u64);
+
+            /* check if the aux_buffer string matches the expected size (the max string is (0x1000*5)-1 bytes in size)*/
+            process.exec();
+
+            let aux_string = process.aux_string();
+            assert_eq!(aux_string.len(), std::cmp::min(process.aux_data_misc().len(), (0x1000*5)-1));
+
+            process.shutdown();
+            fs::remove_dir_all(Path::new(workdir)).unwrap();
+        }
+    }
+
 }
 
