@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 libnyx={path="./libnyx/libnyx"}
 nix = "0.17.0"
+yaml-rust = "0.4.5"
