@@ -2,6 +2,9 @@ extern crate nix;
 
 #[cfg(test)]
 mod tests {
+    use yaml_rust::yaml::Yaml;
+    use yaml_rust::YamlLoader;
+    use std::io::Read;
     use std::process::Command;
     use nix::unistd::gettid;
     use std::fs;
@@ -747,5 +750,43 @@ mod tests {
         }
     }
 
+    #[test]
+    fn parse_snapshot_meta_data_file(){
+
+        let target = "out/test_processor_trace_64/";
+        setup();
+        let workdir = &format!("/tmp/workdir_{}", gettid());
+
+        let mut runner = init_qemu(target, workdir, 0x1000, true, true, false, None).unwrap();
+
+        let r = runner.exec();
+
+        println!("exit reason: {:?}", r);
+
+        /* check if snapshot file exists in workdir */
+        let snapshot_yaml_file = format!("{}/snapshot/state.yaml", workdir);
+        assert!(Path::new(&snapshot_yaml_file).exists());
+
+        /* print content of snapshot meta file */
+        let mut f = std::fs::File::open(snapshot_yaml_file.to_string()).unwrap();
+        let mut s: String = String::new();
+        f.read_to_string(&mut s).unwrap();
+        println!("{}", s);
+
+        /* parse snapshot meta file */
+        let yaml_data: &Yaml = &YamlLoader::load_from_str(s.as_str()).unwrap()[0];
+        let nyx_serialized_state_version = yaml_data["qemu_nyx"]["nyx_serialized_state_version"].as_i64().unwrap();
+        //println!("a: {:?}", nyx_serialized_state_version);
+        assert_eq!(nyx_serialized_state_version, 1);
+
+        let mem_mode = yaml_data["processor_trace"]["mem_mode"].as_str().unwrap();   
+        //println!("b: {:?}", mem_mode);
+        assert_eq!(mem_mode, "mm_64_l4_paging");
+
+        runner.shutdown();
+        fs::remove_dir_all(Path::new(workdir)).unwrap();
+
+        assert!(true);
+    }
 }
 
