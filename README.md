@@ -6,6 +6,19 @@ A simple unit test framework for the QEMU-Nyx hypervisor backend.
 <img align="right" width="200"  src="logo.png">
 </p>
 
+## Dependency
+required package
+```
+sudo apt install -y libgtk-3-dev libc6-dev-i386 gcc-multilib
+```
+check KVM
+```
+sudo modprobe -r kvm-intel
+sudo modprobe -r kvm
+sudo modprobe  kvm enable_vmware_backdoor=y
+sudo modprobe  kvm-intel
+cat /sys/module/kvm/parameters/enable_vmware_backdoor
+```
 ## Build
 
 ```
