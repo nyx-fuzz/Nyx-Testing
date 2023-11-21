@@ -697,7 +697,7 @@ mod tests {
 
     #[test]
     fn set_agent_configuration_twice_64(){
-        test_early_abort("out/test_set_agent_configuration_twice_32/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG called twice...")
+        test_early_abort("out/test_set_agent_configuration_twice_64/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG called twice...")
     }
 
     #[test]
