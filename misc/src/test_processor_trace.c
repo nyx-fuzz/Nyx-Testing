@@ -52,7 +52,9 @@ int main(int argc, char** argv){
 
 	install_segv_handler();
 
+#ifndef NO_IP_RANGES
     kAFL_hypercall(HYPERCALL_KAFL_RANGE_SUBMIT, (uintptr_t)ranges);
+#endif
 
 	kAFL_hypercall(HYPERCALL_KAFL_USER_FAST_ACQUIRE, 0);
 

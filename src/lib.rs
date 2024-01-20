@@ -136,12 +136,22 @@ mod tests {
         assert!(success);
     }
 
-    fn test_processor_trace(sharedir: &str, use_redqueen: bool){
+    fn test_processor_trace(sharedir: &str, use_redqueen: bool, expected_error: Option<String>){
         setup();
         let workdir = &format!("/tmp/workdir_{}", gettid());
 
-        let mut process = init_default(sharedir, workdir, false).unwrap();
-        
+        let mut process = match init_default(sharedir, workdir, false) {
+            Ok(x) => x,
+            Err(r) => {
+                if expected_error.is_some() {
+                    if r.contains(&expected_error.unwrap()) {
+                        return;
+                    }
+                }
+                panic!("QEMU-Nyx failed: {}", r);
+            }
+        };
+
         let mut success;
 
         let size = 10;
@@ -279,6 +289,8 @@ mod tests {
         /* create pre snapshot */
         let config = NyxConfig::load("out/test_custom_buffer_sizes_host_to_guest_64/").unwrap();
         //println!("config: {}", config);
+
+        assert!(Path::new(&format!("/tmp/hda")).exists());
 
         let qemu_binary = config.qemu_binary_path().unwrap();
         let kernel_image = config.kernel_image_path().unwrap();
@@ -707,22 +719,22 @@ mod tests {
 
     #[test]
     fn processor_trace_64(){
-        test_processor_trace("out/test_processor_trace_64/", false)
+        test_processor_trace("out/test_processor_trace_64/", false, None)
     }
 
     #[test]
     fn processor_trace_32(){
-        test_processor_trace("out/test_processor_trace_32/", false)
+        test_processor_trace("out/test_processor_trace_32/", false, None)
     }
 
     #[test]
     fn processor_trace_redqueen_64(){
-        test_processor_trace("out/test_processor_trace_64/", true)
+        test_processor_trace("out/test_processor_trace_64/", true, None)
     }
 
     #[test]
     fn processor_trace_redqueen_32(){
-        test_processor_trace("out/test_processor_trace_32/", true)
+        test_processor_trace("out/test_processor_trace_32/", true, None)
     }
 
     #[test]
@@ -750,10 +762,8 @@ mod tests {
         }
     }
 
-    #[test]
-    fn parse_snapshot_meta_data_file(){
+    fn parse_snapshot_meta_data_file(target: &str){
 
-        let target = "out/test_processor_trace_64/";
         setup();
         let workdir = &format!("/tmp/workdir_{}", gettid());
 
@@ -788,5 +798,28 @@ mod tests {
 
         assert!(true);
     }
+
+    #[test]
+    fn snapshot_meta_data_file(){
+        let target = "out/test_variable_aux_buffer_size/";
+        parse_snapshot_meta_data_file(target);
+    }
+
+    #[test]
+    fn processor_trace_snapshot_meta_data_file(){
+        let target = "out/test_processor_trace_64/";
+        parse_snapshot_meta_data_file(target);
+    }
+
+    #[test]
+    fn processor_trace_64_no_ip_filter(){
+        test_processor_trace("out/test_processor_trace_64_no_ip_ranges/", false, Some("Intel PT mode cannot be enabled without any IP filters enabled".to_string()))
+    }
+    
+    #[test]
+    fn processor_trace_32_no_ip_filter(){
+        test_processor_trace("out/test_processor_trace_32_no_ip_ranges/", false, Some("Intel PT mode cannot be enabled without any IP filters enabled".to_string()))
+    }
+
 }
 

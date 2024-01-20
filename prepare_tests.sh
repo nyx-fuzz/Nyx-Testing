@@ -131,6 +131,16 @@ cp -R out/sharedir_template_32 out/test_processor_trace_32/
 gcc misc/src/helper.c  misc/src/test_processor_trace.c -m32 -static -I misc/src/ -I ./packer/ -o out/test_processor_trace_32/target
 gcc misc/src/helper.c  misc/src/test_processor_trace.c -m32 -static -I misc/src/ -I ./packer/  -DNO_PT_NYX -o out/test_processor_trace_32/target_no_pt
 
+echo "Compiling test: test_processor_trace_64_no_ip_ranges"
+cp -R out/sharedir_template_64 out/test_processor_trace_64_no_ip_ranges/
+gcc misc/src/helper.c  misc/src/test_processor_trace.c -m64 -static -I misc/src/ -I ./packer/ -DNO_IP_RANGES -o out/test_processor_trace_64_no_ip_ranges/target
+gcc misc/src/helper.c  misc/src/test_processor_trace.c -m64 -static -I misc/src/ -I ./packer/ -DNO_IP_RANGES -DNO_PT_NYX -o out/test_processor_trace_64_no_ip_ranges/target_no_pt
+
+echo "Compiling test: test_processor_trace_32_no_ip_ranges"
+cp -R out/sharedir_template_32 out/test_processor_trace_32_no_ip_ranges/
+gcc misc/src/helper.c  misc/src/test_processor_trace.c -m32 -static -I misc/src/ -I ./packer/ -DNO_IP_RANGES -o out/test_processor_trace_32_no_ip_ranges/target
+gcc misc/src/helper.c  misc/src/test_processor_trace.c -m32 -static -I misc/src/ -I ./packer/ -DNO_IP_RANGES -DNO_PT_NYX -o out/test_processor_trace_32_no_ip_ranges/target_no_pt
+
 echo "Compiling test: test_variable_aux_buffer_size"
 cp -R out/sharedir_template_64 out/test_variable_aux_buffer_size/
 gcc misc/src/helper.c  misc/src/test_variable_aux_buffer_size.c -static -I misc/src/ -I ./packer/ -o out/test_variable_aux_buffer_size/target
