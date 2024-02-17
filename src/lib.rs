@@ -638,7 +638,7 @@ mod tests {
 
     #[test]
     fn input_buffer_write_protection_32() {
-        test_input_buffer_write_protection("out/test_input_buffer_write_protection_64/");
+        test_input_buffer_write_protection("out/test_input_buffer_write_protection_32/");
     }
 
     #[test]
@@ -648,7 +648,7 @@ mod tests {
 
     #[test]
     fn input_buffer_write_protection_child_32() {
-        test_input_buffer_write_protection_child("out/test_input_buffer_write_protection_64/");
+        test_input_buffer_write_protection_child("out/test_input_buffer_write_protection_32/");
     }
 
     #[test]
@@ -709,7 +709,7 @@ mod tests {
 
     #[test]
     fn set_agent_configuration_twice_64(){
-        test_early_abort("out/test_set_agent_configuration_twice_32/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG called twice...")
+        test_early_abort("out/test_set_agent_configuration_twice_64/", "KVM_EXIT_KAFL_SET_AGENT_CONFIG called twice...")
     }
 
     #[test]
